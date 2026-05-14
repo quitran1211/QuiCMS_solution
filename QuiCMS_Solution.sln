@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMS.Data", "CMS.Data\CMS.Data.csproj", "{562B6A74-1E3E-42BA-9B66-9998303C65D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Backend", "CMS.Backend\CMS.Backend.csproj", "{B8B76015-4503-4E61-A72A-1DBD3AC1655F}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "cms.frontend", "cms.frontend\", "{6C4FC3BB-E878-470A-A3B2-ED0E6CEDA37E}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_61504"
+		Debug.AspNetCompiler.PhysicalPath = "cms.frontend\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_61504\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_61504"
+		Release.AspNetCompiler.PhysicalPath = "cms.frontend\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_61504\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "61504"
+		SlnRelativePath = "cms.frontend\"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{562B6A74-1E3E-42BA-9B66-9998303C65D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{562B6A74-1E3E-42BA-9B66-9998303C65D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{562B6A74-1E3E-42BA-9B66-9998303C65D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{562B6A74-1E3E-42BA-9B66-9998303C65D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8B76015-4503-4E61-A72A-1DBD3AC1655F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8B76015-4503-4E61-A72A-1DBD3AC1655F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8B76015-4503-4E61-A72A-1DBD3AC1655F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8B76015-4503-4E61-A72A-1DBD3AC1655F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C4FC3BB-E878-470A-A3B2-ED0E6CEDA37E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C4FC3BB-E878-470A-A3B2-ED0E6CEDA37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C4FC3BB-E878-470A-A3B2-ED0E6CEDA37E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C4FC3BB-E878-470A-A3B2-ED0E6CEDA37E}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BAE0233E-6461-4C8A-A133-27CF37B7F702}
+	EndGlobalSection
+EndGlobal
