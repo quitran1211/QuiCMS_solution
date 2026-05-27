@@ -1,84 +1,94 @@
 ﻿using CMS.Data;
 using CMS.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Backend.Controllers
 {
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordHasher<User> _hasher = new PasswordHasher<User>();
 
         public UserController(ApplicationDbContext context)
         {
             _context = context;
         }
+
+        // ================= INDEX =================
         public IActionResult Index()
         {
-            // Lấy dữ liệu THẬT từ bảng Posts trong SQL
             var data = _context.Users.ToList();
             return View(data);
         }
-        // 1. Hàm GET: Dùng để hiển thị giao diện Form cho nhập
+
+        // ================= CREATE =================
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
-        // 2. Hàm POST: Dùng để đón dữ liệu từ Form gửi lên và lưu vào SQL
+
         [HttpPost]
-        public IActionResult Create(User model)
+        public IActionResult Create(User model, string password)
         {
-            // BƯỚC 1: Thêm dữ liệu vào bộ nhớ tạm của Entity Framework
+            if (string.IsNullOrEmpty(password))
+            {
+                ModelState.AddModelError("", "Password không được để trống");
+                return View(model);
+            }
+
+            // HASH PASSWORD
+            model.PasswordHash = _hasher.HashPassword(model, password);
+
             _context.Users.Add(model);
-            // BƯỚC 2: Ra lệnh cho hệ thống ghi dữ liệu thật sự vào SQL Server
             _context.SaveChanges();
-            // Sau khi lưu thành công, tự động quay về trang danh sách
+
             return RedirectToAction("Index");
         }
 
+        // ================= DELETE =================
         public IActionResult Delete(int id)
         {
-            // Bước 1: Tìm đối tượng danh mục trong Database bằng Id
             var user = _context.Users.Find(id);
 
-            // Kiểm tra nếu tìm thấy thì mới xóa
             if (user != null)
             {
-                // Bước 2: Lệnh xóa khỏi bộ nhớ tạm (Tracking)
                 _context.Users.Remove(user);
-
-                // Bước 3: Chốt phiên làm việc, xóa thực sự trong SQL Server
                 _context.SaveChanges();
             }
 
-            // Sau khi xóa xong, quay lại trang danh sách để cập nhật giao diện
             return RedirectToAction("Index");
         }
+
+        // ================= EDIT =================
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            // Tìm danh mục trong Database theo Id [cite: 348, 350]
             var user = _context.Users.Find(id);
-
             if (user == null) return NotFound();
 
-            return View(user); // Gửi đối tượng tìm được sang giao diện Edit
+            return View(user);
         }
 
-        // 2. Hàm POST: Nhận dữ liệu mới từ người dùng và lưu lại
         [HttpPost]
-        public IActionResult Edit(User model)
+        public IActionResult Edit(User model, string newPassword)
         {
-            // Lệnh cập nhật đối tượng vào bộ nhớ tạm
-            _context.Users.Update(model);
+            var user = _context.Users.Find(model.Id);
+            if (user == null) return NotFound();
 
-            // Lưu thay đổi thực sự xuống SQL Server [cite: 504, 509]
+            // update field thường
+            user.Username = model.Username;
+
+            // nếu có password mới → hash
+            if (!string.IsNullOrEmpty(newPassword))
+            {
+                user.PasswordHash = _hasher.HashPassword(user, newPassword);
+            }
+
             _context.SaveChanges();
 
-            // Quay lại trang danh sách để xem kết quả
             return RedirectToAction("Index");
         }
     }
-
 }

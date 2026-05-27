@@ -1,28 +1,29 @@
-﻿using CMS.Data;
+﻿/*
+ * Họ và Tên: Trần Thị Kim Quí
+ * Mã SV:2123110042
+ * Ngày tạo: 15/05/2026
+ */
+using CMS.Data;
 using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
 {
-    public class PostController : Controller
+    public class CategoryProductController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public PostController(ApplicationDbContext context)
+
+        // "Tiêm" kết nối vào Controller
+        public CategoryProductController(ApplicationDbContext context)
         {
             _context = context;
         }
+
         public IActionResult Index()
         {
-            // Lấy dữ liệu THẬT từ bảng Posts trong SQL
-            var data = _context.Posts.ToList();
+            // Lấy dữ liệu THẬT từ bảng Categories trong SQL
+            var data = _context.CategoriesProducts.ToList();
             return View(data);
-        }
-
-        // Hàm Details: Hiển thị chi tiết một bài viết (Bổ sung  khá giỏi)
-        public IActionResult Details(int id)
-        {
-
-            return View(id);
         }
         // 1. Hàm GET: Dùng để hiển thị giao diện Form cho nhập
         [HttpGet]
@@ -32,10 +33,10 @@ namespace CMS.Backend.Controllers
         }
         // 2. Hàm POST: Dùng để đón dữ liệu từ Form gửi lên và lưu vào SQL
         [HttpPost]
-        public IActionResult Create(Post model)
+        public IActionResult Create(CategoryProduct model)
         {
             // BƯỚC 1: Thêm dữ liệu vào bộ nhớ tạm của Entity Framework
-            _context.Posts.Add(model);
+            _context.CategoriesProducts.Add(model);
             // BƯỚC 2: Ra lệnh cho hệ thống ghi dữ liệu thật sự vào SQL Server
             _context.SaveChanges();
             // Sau khi lưu thành công, tự động quay về trang danh sách
@@ -45,13 +46,13 @@ namespace CMS.Backend.Controllers
         public IActionResult Delete(int id)
         {
             // Bước 1: Tìm đối tượng danh mục trong Database bằng Id
-            var post = _context.Posts.Find(id);
+            var categoryProduct = _context.CategoriesProducts.Find(id);
 
             // Kiểm tra nếu tìm thấy thì mới xóa
-            if (post != null)
+            if (categoryProduct != null)
             {
                 // Bước 2: Lệnh xóa khỏi bộ nhớ tạm (Tracking)
-                _context.Posts.Remove(post);
+                _context.CategoriesProducts.Remove(categoryProduct);
 
                 // Bước 3: Chốt phiên làm việc, xóa thực sự trong SQL Server
                 _context.SaveChanges();
@@ -64,19 +65,19 @@ namespace CMS.Backend.Controllers
         public IActionResult Edit(int id)
         {
             // Tìm danh mục trong Database theo Id [cite: 348, 350]
-            var post = _context.Posts.Find(id);
+            var categoryProduct = _context.CategoriesProducts.Find(id);
 
-            if (post == null) return NotFound();
+            if (categoryProduct == null) return NotFound();
 
-            return View(post); // Gửi đối tượng tìm được sang giao diện Edit
+            return View(categoryProduct); // Gửi đối tượng tìm được sang giao diện Edit
         }
 
         // 2. Hàm POST: Nhận dữ liệu mới từ người dùng và lưu lại
         [HttpPost]
-        public IActionResult Edit(Post model)
+        public IActionResult Edit(CategoryProduct model)
         {
             // Lệnh cập nhật đối tượng vào bộ nhớ tạm
-            _context.Posts.Update(model);
+            _context.CategoriesProducts.Update(model);
 
             // Lưu thay đổi thực sự xuống SQL Server [cite: 504, 509]
             _context.SaveChanges();
@@ -85,5 +86,4 @@ namespace CMS.Backend.Controllers
             return RedirectToAction("Index");
         }
     }
-
 }

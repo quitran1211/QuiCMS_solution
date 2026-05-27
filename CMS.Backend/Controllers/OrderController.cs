@@ -1,43 +1,55 @@
-﻿using CMS.Data;
-using CMS.Data.Entities;
+﻿using CMS.Data.Entities;
+using CMS.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CMS.Backend.Controllers
 {
-    public class PostController : Controller
+    public class OrderController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public PostController(ApplicationDbContext context)
+
+        // "Tiêm" kết nối vào Controller
+        public OrderController(ApplicationDbContext context)
         {
             _context = context;
         }
+        public IActionResult Order(int id)
+        {
+            return View(id);
+        }
+
         public IActionResult Index()
         {
-            // Lấy dữ liệu THẬT từ bảng Posts trong SQL
-            var data = _context.Posts.ToList();
+            // Lấy dữ liệu THẬT từ bảng Orders trong SQL
+            var data = _context.Orders.ToList();
             return View(data);
         }
 
-        // Hàm Details: Hiển thị chi tiết một bài viết (Bổ sung  khá giỏi)
-        public IActionResult Details(int id)
-        {
-
-            return View(id);
-        }
         // 1. Hàm GET: Dùng để hiển thị giao diện Form cho nhập
         [HttpGet]
         public IActionResult Create()
         {
+            ViewBag.Customers = _context.Customers.ToList();
+
             return View();
         }
+
         // 2. Hàm POST: Dùng để đón dữ liệu từ Form gửi lên và lưu vào SQL
         [HttpPost]
-        public IActionResult Create(Post model)
+        public IActionResult Create(Order model)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Customers = _context.Customers.ToList();
+                return View(model);
+            }
             // BƯỚC 1: Thêm dữ liệu vào bộ nhớ tạm của Entity Framework
-            _context.Posts.Add(model);
+            _context.Orders.Add(model);
+
             // BƯỚC 2: Ra lệnh cho hệ thống ghi dữ liệu thật sự vào SQL Server
             _context.SaveChanges();
+
             // Sau khi lưu thành công, tự động quay về trang danh sách
             return RedirectToAction("Index");
         }
@@ -45,13 +57,13 @@ namespace CMS.Backend.Controllers
         public IActionResult Delete(int id)
         {
             // Bước 1: Tìm đối tượng danh mục trong Database bằng Id
-            var post = _context.Posts.Find(id);
+            var order = _context.Orders.Find(id);
 
             // Kiểm tra nếu tìm thấy thì mới xóa
-            if (post != null)
+            if (order != null)
             {
                 // Bước 2: Lệnh xóa khỏi bộ nhớ tạm (Tracking)
-                _context.Posts.Remove(post);
+                _context.Orders.Remove(order);
 
                 // Bước 3: Chốt phiên làm việc, xóa thực sự trong SQL Server
                 _context.SaveChanges();
@@ -60,30 +72,44 @@ namespace CMS.Backend.Controllers
             // Sau khi xóa xong, quay lại trang danh sách để cập nhật giao diện
             return RedirectToAction("Index");
         }
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            // Tìm danh mục trong Database theo Id [cite: 348, 350]
-            var post = _context.Posts.Find(id);
+            // 1. Lấy order trước
+            var order = _context.Orders.Find(id);
+            if (order == null) return NotFound();
 
-            if (post == null) return NotFound();
+            // 2. Sau đó mới tạo dropdown
+            ViewBag.Customers = new SelectList(
+                _context.Customers,
+                "Id",
+                "FullName",
+                order.CustomerId // ✔ selected value
+            );
 
-            return View(post); // Gửi đối tượng tìm được sang giao diện Edit
+            return View(order);
         }
 
         // 2. Hàm POST: Nhận dữ liệu mới từ người dùng và lưu lại
         [HttpPost]
-        public IActionResult Edit(Post model)
+        public IActionResult Edit(Order model)
         {
-            // Lệnh cập nhật đối tượng vào bộ nhớ tạm
-            _context.Posts.Update(model);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Customers = new SelectList(
+                    _context.Customers,
+                    "Id",
+                    "FullName",
+                    model.CustomerId
+                );
+                return View(model);
+            }
 
-            // Lưu thay đổi thực sự xuống SQL Server [cite: 504, 509]
+            _context.Orders.Update(model);
             _context.SaveChanges();
 
-            // Quay lại trang danh sách để xem kết quả
             return RedirectToAction("Index");
         }
     }
-
 }
