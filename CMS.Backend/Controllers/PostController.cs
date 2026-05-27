@@ -1,6 +1,8 @@
 ﻿using CMS.Data;
 using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Backend.Controllers
 {
@@ -28,60 +30,104 @@ namespace CMS.Backend.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            // Chúng ta lấy danh sách Category để đổ vào ViewBag
+            ViewBag.CategoryList = new SelectList(_context.Categories, "Id", "Name");
             return View();
         }
-        // 2. Hàm POST: Dùng để đón dữ liệu từ Form gửi lên và lưu vào SQL
+
+
+
         [HttpPost]
-        public IActionResult Create(Post model)
+        public IActionResult Create(Post model, IFormFile uploadImage)
         {
-            // BƯỚC 1: Thêm dữ liệu vào bộ nhớ tạm của Entity Framework
+            if (uploadImage != null && uploadImage.Length > 0)
+            {
+                // 1. Định nghĩa đường dẫn lưu file: wwwroot/uploads
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                // 2. Tạo tên file duy nhất để không bị đè dữ liệu
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
+                string filePath = Path.Combine(folder, fileName);
+
+                // 3. Chép file vào thư mục
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    uploadImage.CopyTo(stream);
+                }
+
+                // 4. Lưu đường dẫn vào CSDL để sau này hiển thị
+                model.ImageUrl = "/uploads/" + fileName;
+            }
+
             _context.Posts.Add(model);
-            // BƯỚC 2: Ra lệnh cho hệ thống ghi dữ liệu thật sự vào SQL Server
             _context.SaveChanges();
-            // Sau khi lưu thành công, tự động quay về trang danh sách
             return RedirectToAction("Index");
         }
 
         public IActionResult Delete(int id)
         {
-            // Bước 1: Tìm đối tượng danh mục trong Database bằng Id
+            // 1. Tìm bài viết theo Id
             var post = _context.Posts.Find(id);
 
-            // Kiểm tra nếu tìm thấy thì mới xóa
             if (post != null)
             {
-                // Bước 2: Lệnh xóa khỏi bộ nhớ tạm (Tracking)
+                // 2. Xóa khỏi bộ nhớ tạm
                 _context.Posts.Remove(post);
 
-                // Bước 3: Chốt phiên làm việc, xóa thực sự trong SQL Server
+                // 3. Cập nhật xuống SQL Server
                 _context.SaveChanges();
             }
-
-            // Sau khi xóa xong, quay lại trang danh sách để cập nhật giao diện
             return RedirectToAction("Index");
         }
+        // GET: Hiển thị form kèm dữ liệu cũ
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            // Tìm danh mục trong Database theo Id [cite: 348, 350]
             var post = _context.Posts.Find(id);
-
             if (post == null) return NotFound();
 
-            return View(post); // Gửi đối tượng tìm được sang giao diện Edit
+            // Chuẩn bị lại danh sách danh mục để người dùng có thể đổi chuyên mục
+            ViewBag.CategoryList = new SelectList(_context.Categories, "Id", "Name", post.CategoryId);
+            return View(post);
         }
 
-        // 2. Hàm POST: Nhận dữ liệu mới từ người dùng và lưu lại
+        // POST: Thực hiện cập nhật
         [HttpPost]
-        public IActionResult Edit(Post model)
+        public IActionResult Edit(Post model, IFormFile uploadImage)
         {
-            // Lệnh cập nhật đối tượng vào bộ nhớ tạm
+            // Bước 1: Kiểm tra xem người dùng có chọn file ảnh mới không
+            if (uploadImage != null && uploadImage.Length > 0)
+            {
+                // Thực hiện quy trình upload giống như trang Create
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
+                string filePath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    uploadImage.CopyTo(stream);
+                }
+
+                // Cập nhật đường dẫn ảnh mới vào model
+                model.ImageUrl = "/uploads/" + fileName;
+            }
+            else
+            {
+                // Bước quan trọng: Nếu không upload ảnh mới, chúng ta phải giữ lại ảnh cũ
+                // Chúng ta cần lấy lại giá trị ImageUrl từ Database để tránh bị ghi đè thành rỗng
+                var oldPost = _context.Posts.AsNoTracking().FirstOrDefault(p => p.Id == model.Id);
+                if (oldPost != null && string.IsNullOrEmpty(model.ImageUrl))
+                {
+                    model.ImageUrl = oldPost.ImageUrl;
+                }
+            }
             _context.Posts.Update(model);
-
-            // Lưu thay đổi thực sự xuống SQL Server [cite: 504, 509]
             _context.SaveChanges();
-
-            // Quay lại trang danh sách để xem kết quả
             return RedirectToAction("Index");
         }
     }
