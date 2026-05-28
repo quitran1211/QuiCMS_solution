@@ -1,14 +1,14 @@
 ﻿using CMS.Data;
 using CMS.Data.Entities;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly PasswordHasher<User> _hasher = new PasswordHasher<User>();
 
         public UserController(ApplicationDbContext context)
         {
@@ -38,8 +38,7 @@ namespace CMS.Backend.Controllers
                 return View(model);
             }
 
-            // HASH PASSWORD
-            model.PasswordHash = _hasher.HashPassword(model, password);
+            model.PasswordHash = password;
 
             _context.Users.Add(model);
             _context.SaveChanges();
@@ -66,7 +65,9 @@ namespace CMS.Backend.Controllers
         public IActionResult Edit(int id)
         {
             var user = _context.Users.Find(id);
-            if (user == null) return NotFound();
+
+            if (user == null)
+                return NotFound();
 
             return View(user);
         }
@@ -75,15 +76,17 @@ namespace CMS.Backend.Controllers
         public IActionResult Edit(User model, string newPassword)
         {
             var user = _context.Users.Find(model.Id);
-            if (user == null) return NotFound();
+
+            if (user == null)
+                return NotFound();
 
             // update field thường
             user.Username = model.Username;
 
-            // nếu có password mới → hash
+            // nếu nhập password mới
             if (!string.IsNullOrEmpty(newPassword))
             {
-                user.PasswordHash = _hasher.HashPassword(user, newPassword);
+                user.PasswordHash = newPassword;
             }
 
             _context.SaveChanges();
