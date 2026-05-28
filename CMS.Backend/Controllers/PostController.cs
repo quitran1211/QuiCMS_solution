@@ -23,8 +23,12 @@ namespace CMS.Backend.Controllers
         // Hàm Details: Hiển thị chi tiết một bài viết (Bổ sung  khá giỏi)
         public IActionResult Details(int id)
         {
+            var post = _context.Posts
+                .FirstOrDefault(p => p.Id == id);
 
-            return View(id);
+            if (post == null) return NotFound();
+
+            return View(post); 
         }
         // 1. Hàm GET: Dùng để hiển thị giao diện Form cho nhập
         [HttpGet]
