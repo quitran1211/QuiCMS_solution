@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using CMS.Data; // Thay bằng Namespace của project chứa ApplicationDbContext của bạn
+using CMS.Data;
 
 namespace CMS.Backend.Controllers
 {
@@ -28,13 +28,16 @@ namespace CMS.Backend.Controllers
         {
             // Lấy dữ liệu từ bảng Posts
             var posts = _context.Posts
-                .OrderByDescending(p => p.Id) // Sắp xếp bài mới nhất lên đầu
-                .Select(p => new {            // "Gọt tỉa" dữ liệu: chỉ lấy những trường cần thiết
+                .OrderByDescending(p => p.Id)
+                .Select(p => new
+                {
                     p.Id,
                     p.Title,
+                    p.Content,
                     p.ImageUrl,
                     p.CreatedDate,
-                    CategoryName = p.Category.Name // Lấy tên danh mục thay vì chỉ lấy ID
+                    p.CategoryId,
+                    CategoryName = p.Category.Name
                 })
                 .ToList();
 
@@ -49,11 +52,15 @@ namespace CMS.Backend.Controllers
             // Lọc các bài viết có CategoryId trùng với ID truyền vào từ URL
             var posts = _context.Posts
                 .Where(p => p.CategoryId == categoryId)
-                .Select(p => new {
+                .Select(p => new
+                {
                     p.Id,
                     p.Title,
+                    p.Content,
                     p.ImageUrl,
-                    p.CreatedDate
+                    p.CreatedDate,
+                    p.CategoryId,
+                    CategoryName = p.Category.Name
                 })
                 .ToList();
 
@@ -66,13 +73,27 @@ namespace CMS.Backend.Controllers
         {
             // 2. Tìm bài viết đầu tiên có Id khớp với tham số truyền vào
             var post = _context.Posts
-                .FirstOrDefault(p => p.Id == id);
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.Content,
+                    p.ImageUrl,
+                    p.CreatedDate,
+                    p.CategoryId,
+                    CategoryName = p.Category.Name
+                })
+                .FirstOrDefault();
 
             // 3. Xử lý trường hợp không tìm thấy (ID không tồn tại)
             if (post == null)
             {
                 // Trả về lỗi 404 kèm thông báo dưới dạng JSON
-                return NotFound(new { message = "Không tìm thấy bài viết này trong hệ thống" });
+                return NotFound(new
+                {
+                    message = "Không tìm thấy bài viết này trong hệ thống"
+                });
             }
 
             // 4. Trả về bài viết tìm thấy kèm mã 200 (Thành công)

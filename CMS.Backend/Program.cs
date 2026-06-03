@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ================= ADD SERVICES =================
 
 // MVC
 builder.Services.AddControllersWithViews();
@@ -38,7 +37,6 @@ builder.Services.AddCors(options => {
 });
 var app = builder.Build();
 
-// ================= PIPELINE =================
 
 if (!app.Environment.IsDevelopment())
 {
