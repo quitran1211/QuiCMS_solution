@@ -6,7 +6,6 @@
 using CMS.Data;
 using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Backend.Controllers
@@ -38,8 +37,8 @@ namespace CMS.Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                var hasher = new PasswordHasher<Customer>();
-                model.Password = hasher.HashPassword(model, Password);
+                // Lưu mật khẩu thô
+                model.Password = Password;
 
                 _context.Customers.Add(model);
                 _context.SaveChanges();
@@ -79,7 +78,6 @@ namespace CMS.Backend.Controllers
             var existing = _context.Customers.Find(model.Id);
             if (existing == null) return NotFound();
 
-            // cập nhật field thường
             existing.FullName = model.FullName;
             existing.Email = model.Email;
             existing.Phone = model.Phone;
@@ -87,8 +85,8 @@ namespace CMS.Backend.Controllers
 
             if (!string.IsNullOrEmpty(Password))
             {
-                var hasher = new PasswordHasher<Customer>();
-                existing.Password = hasher.HashPassword(existing, Password);
+                // Lưu mật khẩu thô
+                existing.Password = Password;
             }
 
             _context.SaveChanges();
