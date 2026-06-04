@@ -8,10 +8,8 @@ namespace CMS.Backend.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        // Khai báo biến kết nối Database
         private readonly ApplicationDbContext _context;
 
-        // Constructor
         public OrdersController(ApplicationDbContext context)
         {
             _context = context;
@@ -19,11 +17,10 @@ namespace CMS.Backend.Controllers
 
         // POST: api/Orders
         [HttpPost]
-        public IActionResult Create([FromBody] Order order)
+        public IActionResult Create([FromBody] CreateOrderRequest model)
         {
-            // Kiểm tra khách hàng có tồn tại hay không
             var customer = _context.Customers
-                .FirstOrDefault(c => c.Id == order.CustomerId);
+                .FirstOrDefault(c => c.Id == model.CustomerId);
 
             if (customer == null)
             {
@@ -33,12 +30,11 @@ namespace CMS.Backend.Controllers
                 });
             }
 
-            // Tạo mới Order để tránh nhận Navigation Property từ request
             var newOrder = new Order
             {
-                CustomerId = order.CustomerId,
-                Notes = order.Notes,
-                Status = 0, // Chờ duyệt
+                CustomerId = model.CustomerId,
+                Notes = model.Notes,
+                Status = 0,
                 OrderDate = DateTime.Now
             };
 
@@ -55,7 +51,6 @@ namespace CMS.Backend.Controllers
                 newOrder.Notes
             });
         }
-
 
         // GET: api/Orders/{id}
         [HttpGet("{id}")]
@@ -84,11 +79,11 @@ namespace CMS.Backend.Controllers
 
             return Ok(order);
         }
+
         // GET: api/Orders/customer/{customerId}
         [HttpGet("customer/{customerId}")]
         public IActionResult GetByCustomer(int customerId)
         {
-            // Kiểm tra khách hàng có tồn tại hay không
             var customer = _context.Customers
                 .FirstOrDefault(c => c.Id == customerId);
 
@@ -100,7 +95,6 @@ namespace CMS.Backend.Controllers
                 });
             }
 
-            // Lấy danh sách đơn hàng của khách hàng
             var orders = _context.Orders
                 .Where(o => o.CustomerId == customerId)
                 .OrderByDescending(o => o.Id)
@@ -117,5 +111,13 @@ namespace CMS.Backend.Controllers
 
             return Ok(orders);
         }
+    }
+
+    // DTO tạo đơn hàng
+    public class CreateOrderRequest
+    {
+        public int CustomerId { get; set; }
+
+        public string? Notes { get; set; }
     }
 }

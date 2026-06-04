@@ -44,7 +44,7 @@ namespace CMS.Backend.Controllers
 
         // PUT: api/Customers/{id}
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Customer customer)
+        public IActionResult Update(int id, [FromBody] CustomerUpdate model)
         {
             var existingCustomer = _context.Customers
                 .FirstOrDefault(c => c.Id == id);
@@ -57,15 +57,15 @@ namespace CMS.Backend.Controllers
                 });
             }
 
-            existingCustomer.FullName = customer.FullName;
-            existingCustomer.Email = customer.Email;
-            existingCustomer.Phone = customer.Phone;
-            existingCustomer.Address = customer.Address;
+            existingCustomer.FullName = model.FullName;
+            existingCustomer.Email = model.Email;
+            existingCustomer.Phone = model.Phone;
+            existingCustomer.Address = model.Address;
 
             // Chỉ cập nhật mật khẩu khi có truyền lên
-            if (!string.IsNullOrEmpty(customer.Password))
+            if (!string.IsNullOrEmpty(model.Password))
             {
-                existingCustomer.Password = customer.Password;
+                existingCustomer.Password = model.Password;
             }
 
             _context.SaveChanges();
@@ -80,5 +80,19 @@ namespace CMS.Backend.Controllers
                 existingCustomer.Address
             });
         }
+    }
+
+    // DTO cập nhật khách hàng
+    public class CustomerUpdate
+    {
+        public string FullName { get; set; }
+
+        public string Email { get; set; }
+
+        public string? Phone { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? Password { get; set; }
     }
 }

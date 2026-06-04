@@ -17,11 +17,10 @@ namespace CMS.Backend.Controllers
 
         // POST: api/Auth/CustomerRegister
         [HttpPost("CustomerRegister")]
-        public IActionResult CustomerRegister([FromBody] Customer customer)
+        public IActionResult CustomerRegister([FromBody] CustomerRegister model)
         {
-            // Kiểm tra email đã tồn tại chưa
             var exists = _context.Customers
-                .Any(c => c.Email == customer.Email);
+                .Any(c => c.Email == model.Email);
 
             if (exists)
             {
@@ -31,38 +30,37 @@ namespace CMS.Backend.Controllers
                 });
             }
 
-            // Lưu khách hàng mới
-            var newCustomer = new Customer
+            var customer = new Customer
             {
-                FullName = customer.FullName,
-                Email = customer.Email,
-                Password = customer.Password, // Lưu mật khẩu thô
-                Phone = customer.Phone,
-                Address = customer.Address
+                FullName = model.FullName,
+                Email = model.Email,
+                Password = model.Password,
+                Phone = model.Phone,
+                Address = model.Address
             };
 
-            _context.Customers.Add(newCustomer);
+            _context.Customers.Add(customer);
             _context.SaveChanges();
 
             return Ok(new
             {
                 message = "Đăng ký tài khoản thành công",
-                newCustomer.Id,
-                newCustomer.FullName,
-                newCustomer.Email
+                customer.Id,
+                customer.FullName,
+                customer.Email
             });
         }
 
         // POST: api/Auth/CustomerLogin
         [HttpPost("CustomerLogin")]
-        public IActionResult CustomerLogin([FromBody] Customer customer)
+        public IActionResult CustomerLogin([FromBody] CustomerLogin model)
         {
-            var loginCustomer = _context.Customers
+            var customer = _context.Customers
                 .FirstOrDefault(c =>
-                    c.Email == customer.Email &&
-                    c.Password == customer.Password);
+                    c.Email == model.Email &&
+                    c.Password == model.Password);
 
-            if (loginCustomer == null)
+            if (customer == null)
             {
                 return Unauthorized(new
                 {
@@ -72,12 +70,34 @@ namespace CMS.Backend.Controllers
 
             return Ok(new
             {
-                loginCustomer.Id,
-                loginCustomer.FullName,
-                loginCustomer.Email,
-                loginCustomer.Phone,
-                loginCustomer.Address
+                customer.Id,
+                customer.FullName,
+                customer.Email,
+                customer.Phone,
+                customer.Address
             });
         }
+    }
+
+    // DTO Đăng ký
+    public class CustomerRegister
+    {
+        public string FullName { get; set; }
+
+        public string Email { get; set; }
+
+        public string Password { get; set; }
+
+        public string? Phone { get; set; }
+
+        public string? Address { get; set; }
+    }
+
+    // DTO Đăng nhập
+    public class CustomerLogin
+    {
+        public string Email { get; set; }
+
+        public string Password { get; set; }
     }
 }

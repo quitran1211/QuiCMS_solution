@@ -17,11 +17,11 @@ namespace CMS.Backend.Controllers
 
         // POST: api/OrderDetails
         [HttpPost]
-        public IActionResult Create([FromBody] OrderDetail orderDetail)
+        public IActionResult Create([FromBody] CreateOrderDetailRequest model)
         {
             // Kiểm tra đơn hàng
             var order = _context.Orders
-                .FirstOrDefault(o => o.Id == orderDetail.OrderId);
+                .FirstOrDefault(o => o.Id == model.OrderId);
 
             if (order == null)
             {
@@ -33,7 +33,7 @@ namespace CMS.Backend.Controllers
 
             // Kiểm tra sản phẩm
             var product = _context.Products
-                .FirstOrDefault(p => p.Id == orderDetail.ProductId);
+                .FirstOrDefault(p => p.Id == model.ProductId);
 
             if (product == null)
             {
@@ -45,10 +45,10 @@ namespace CMS.Backend.Controllers
 
             var newOrderDetail = new OrderDetail
             {
-                OrderId = orderDetail.OrderId,
-                ProductId = orderDetail.ProductId,
-                Quantity = orderDetail.Quantity,
-                UnitPrice = product.Price // lấy giá hiện tại của sản phẩm
+                OrderId = model.OrderId,
+                ProductId = model.ProductId,
+                Quantity = model.Quantity,
+                UnitPrice = product.Price
             };
 
             _context.OrderDetails.Add(newOrderDetail);
@@ -96,5 +96,15 @@ namespace CMS.Backend.Controllers
 
             return Ok(orderDetails);
         }
+    }
+
+    // DTO tạo chi tiết đơn hàng
+    public class CreateOrderDetailRequest
+    {
+        public int OrderId { get; set; }
+
+        public int ProductId { get; set; }
+
+        public int Quantity { get; set; }
     }
 }

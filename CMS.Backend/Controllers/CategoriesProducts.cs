@@ -1,33 +1,23 @@
 ﻿using CMS.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
 {
-    // 1. Định nghĩa đường dẫn để gọi API. [controller] sẽ tự lấy tên "Categories"
-    // Khi chạy, địa chỉ sẽ là: https://localhost:xxxx/api/categories
     [Route("api/[controller]")]
-
-    // 2. Đánh dấu đây là một API Controller để hệ thống hỗ trợ các tính năng RESTful
     [ApiController]
-
-    // 3. API Controller phải kế thừa từ ControllerBase (thay vì Controller như MVC)
-    public class CategoriesProducts : ControllerBase
+    public class CategoriesProductsController : ControllerBase
     {
-        // 4. Khai báo biến kết nối Database
         private readonly ApplicationDbContext _context;
 
-        // 5. Hàm khởi tạo (Constructor): "Tiêm" kết nối Database vào để sử dụng
-        public CategoriesProducts(ApplicationDbContext context)
+        public CategoriesProductsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // 1. Chỉ định đây là phương thức GET (Dùng để lấy dữ liệu)
+        // GET: api/CategoriesProducts
         [HttpGet]
         public IActionResult GetAll()
         {
-            // Lấy dữ liệu từ bảng Categories
             var categoriesproducts = _context.CategoriesProducts
                 .OrderByDescending(cp => cp.Id)
                 .Select(cp => new
@@ -38,8 +28,32 @@ namespace CMS.Backend.Controllers
                 })
                 .ToList();
 
-            // Trả về kết quả cho Frontend kèm mã trạng thái 200 (Thành công)
             return Ok(categoriesproducts);
+        }
+
+        // GET: api/CategoriesProducts/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetDetail(int id)
+        {
+            var category = _context.CategoriesProducts
+                .Where(cp => cp.Id == id)
+                .Select(cp => new
+                {
+                    cp.Id,
+                    cp.Name,
+                    cp.Description
+                })
+                .FirstOrDefault();
+
+            if (category == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy danh mục sản phẩm"
+                });
+            }
+
+            return Ok(category);
         }
     }
 }
