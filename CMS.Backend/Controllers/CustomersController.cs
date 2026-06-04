@@ -1,4 +1,5 @@
 ﻿using CMS.Data;
+using CMS.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Backend.Controllers
@@ -14,32 +15,69 @@ namespace CMS.Backend.Controllers
             _context = context;
         }
 
-        // POST: api/customers/login
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] CMS.Data.Entities.Customer customer)
+        // GET: api/Customers/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetDetail(int id)
         {
-            // Kiểm tra Email và Password
-            var loginCustomer = _context.Customers
-                .FirstOrDefault(c =>
-                    c.Email == customer.Email &&
-                    c.Password == customer.Password);
-
-            if (loginCustomer == null)
-            {
-                return Unauthorized(new
+            var customer = _context.Customers
+                .Where(c => c.Id == id)
+                .Select(c => new
                 {
-                    message = "Email hoặc mật khẩu không chính xác"
+                    c.Id,
+                    c.FullName,
+                    c.Email,
+                    c.Phone,
+                    c.Address
+                })
+                .FirstOrDefault();
+
+            if (customer == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy khách hàng"
                 });
             }
 
-            // Trả về thông tin khách hàng
+            return Ok(customer);
+        }
+
+        // PUT: api/Customers/{id}
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] Customer customer)
+        {
+            var existingCustomer = _context.Customers
+                .FirstOrDefault(c => c.Id == id);
+
+            if (existingCustomer == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy khách hàng"
+                });
+            }
+
+            existingCustomer.FullName = customer.FullName;
+            existingCustomer.Email = customer.Email;
+            existingCustomer.Phone = customer.Phone;
+            existingCustomer.Address = customer.Address;
+
+            // Chỉ cập nhật mật khẩu khi có truyền lên
+            if (!string.IsNullOrEmpty(customer.Password))
+            {
+                existingCustomer.Password = customer.Password;
+            }
+
+            _context.SaveChanges();
+
             return Ok(new
             {
-                loginCustomer.Id,
-                loginCustomer.FullName,
-                loginCustomer.Email,
-                loginCustomer.Phone,
-                loginCustomer.Address
+                message = "Cập nhật thông tin thành công",
+                existingCustomer.Id,
+                existingCustomer.FullName,
+                existingCustomer.Email,
+                existingCustomer.Phone,
+                existingCustomer.Address
             });
         }
     }

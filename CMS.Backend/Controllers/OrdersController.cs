@@ -56,25 +56,6 @@ namespace CMS.Backend.Controllers
             });
         }
 
-        // GET: api/Orders
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var orders = _context.Orders
-                .OrderByDescending(o => o.Id)
-                .Select(o => new
-                {
-                    o.Id,
-                    o.OrderDate,
-                    o.CustomerId,
-                    CustomerName = o.Customer.FullName,
-                    o.Status,
-                    o.Notes
-                })
-                .ToList();
-
-            return Ok(orders);
-        }
 
         // GET: api/Orders/{id}
         [HttpGet("{id}")]
@@ -102,6 +83,39 @@ namespace CMS.Backend.Controllers
             }
 
             return Ok(order);
+        }
+        // GET: api/Orders/customer/{customerId}
+        [HttpGet("customer/{customerId}")]
+        public IActionResult GetByCustomer(int customerId)
+        {
+            // Kiểm tra khách hàng có tồn tại hay không
+            var customer = _context.Customers
+                .FirstOrDefault(c => c.Id == customerId);
+
+            if (customer == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy khách hàng"
+                });
+            }
+
+            // Lấy danh sách đơn hàng của khách hàng
+            var orders = _context.Orders
+                .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.Id)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.OrderDate,
+                    o.CustomerId,
+                    CustomerName = o.Customer.FullName,
+                    o.Status,
+                    o.Notes
+                })
+                .ToList();
+
+            return Ok(orders);
         }
     }
 }
