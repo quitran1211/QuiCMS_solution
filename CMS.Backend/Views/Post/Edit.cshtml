@@ -7,8 +7,12 @@
     <h2 class="text-warning">CHỈNH SỬA BÀI VIẾT</h2>
     <hr />
 
-    <form asp-action="Edit" method="post">
+    <form asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data">
+
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
 
         <div class="mb-3">
             <label asp-for="Title" class="form-label fw-bold"></label>
@@ -18,30 +22,75 @@
 
         <div class="mb-3">
             <label asp-for="Content" class="form-label fw-bold"></label>
-            <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+            <textarea asp-for="Content"
+                      class="form-control"
+                      rows="5"></textarea>
             <span asp-validation-for="Content" class="text-danger"></span>
         </div>
 
+        <!-- Ảnh hiện tại -->
         <div class="mb-3">
-            <label asp-for="ImageUrl" class="form-label fw-bold"></label>
-            <input asp-for="ImageUrl" class="form-control" type="text" />
-            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            <label class="form-label fw-bold">Ảnh hiện tại</label>
+            <br />
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                    <img src="@Model.ImageUrl"
+                         width="250"
+                         class="img-thumbnail" />
+            }
+            else
+            {
+                    <p class="text-muted">Chưa có ảnh.</p>
+            }
+        </div>
+
+        <!-- Upload ảnh mới -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">
+                Chọn ảnh mới (nếu muốn thay đổi)
+            </label>
+
+            <input type="file"
+                   name="uploadImage"
+                   class="form-control"
+                   accept=".jpg,.jpeg,.png,.gif,.webp" />
         </div>
 
         <div class="mb-3">
-            <label asp-for="CategoryId" class="form-label fw-bold"></label>
-            <input asp-for="CategoryId" class="form-control" type="number" />
-            <span asp-validation-for="CategoryId" class="text-danger"></span>
+            <label class="form-label fw-bold">Danh mục</label>
+
+            <select asp-for="CategoryId"
+                    class="form-select"
+                    asp-items="ViewBag.CategoryList">
+                <option value="">-- Chọn danh mục --</option>
+            </select>
+
+            <span asp-validation-for="CategoryId"
+                  class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="CreatedDate" class="form-label fw-bold"></label>
-            <input asp-for="CreatedDate" class="form-control" type="datetime-local" />
-            <span asp-validation-for="CreatedDate" class="text-danger"></span>
+            <label asp-for="CreatedDate"
+                   class="form-label fw-bold"></label>
+
+            <input asp-for="CreatedDate"
+                   type="datetime-local"
+                   class="form-control" />
+
+            <span asp-validation-for="CreatedDate"
+                  class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-warning">Cập nhật bài viết</button>
-        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        <button type="submit"
+                class="btn btn-warning">
+            Cập nhật bài viết
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Hủy bỏ
+        </a>
+
     </form>
 </div>
-
