@@ -361,3 +361,26 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build
+bin/
+obj/
+dist/
+build/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.*
