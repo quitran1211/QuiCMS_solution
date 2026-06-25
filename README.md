@@ -19,12 +19,11 @@ Hệ thống cho phép quản lý:
 * Sản phẩm (**Product**)
 * Bài viết (**Post**)
 * Khách hàng (**Customer**)
+* Giỏ hàng (**Cart** + **CartItem**)
 * Đơn hàng (**Order**)
 * Chi tiết đơn hàng (**OrderDetail**)
 * Người dùng (**User**)
 * Quan hệ danh mục – sản phẩm (**CategoryProduct**)
-
-Ngoài ra hệ thống còn cung cấp API để frontend ReactJS hiển thị dữ liệu động từ backend.
 
 ---
 
@@ -39,7 +38,7 @@ Ngoài ra hệ thống còn cung cấp API để frontend ReactJS hiển thị d
 * Phát triển **Web API RESTful**
 * Tích hợp frontend bằng **ReactJS**
 * Áp dụng **Authentication & Authorization**
-* Xây dựng hệ thống quản lý dữ liệu thực tế theo mô hình doanh nghiệp
+* Xây dựng luồng mua hàng thực tế: Giỏ hàng → Thanh toán → Đơn hàng → Trừ tồn kho
 
 ---
 
@@ -69,13 +68,15 @@ Database (SQL Server - CMS_DB)
 * LINQ
 * ASP.NET Core Identity
 * Dependency Injection
+* Transaction (đảm bảo toàn vẹn dữ liệu khi đặt hàng)
 
 ## 🔹 Frontend
 
 * ReactJS
 * React Router DOM
-* Axios
-* Hooks (`useState`, `useEffect`)
+* Axios (axiosClient)
+* Hooks (`useState`, `useEffect`, `useContext`)
+* React Context API (CartContext — đồng bộ badge giỏ hàng toàn app)
 
 ## 🔹 Database
 
@@ -87,7 +88,7 @@ Database (SQL Server - CMS_DB)
 * Visual Studio 2022
 * Node.js
 * SQL Server Management Studio 21
-* Git/GitHub
+* Git / GitHub
 
 ---
 
@@ -98,36 +99,27 @@ CMS Solution
 │
 ├── CMS.Backend (ASP.NET Core MVC + Web API)
 │   ├── Controllers
+│   │   ├── CartsController.cs
 │   │   ├── CategoryController.cs
 │   │   ├── CategoryProductController.cs
 │   │   ├── CustomerController.cs
 │   │   ├── HomeController.cs
-│   │   ├── OrderController.cs
-│   │   ├── OrderDetailController.cs
+│   │   ├── OrdersController.cs
+│   │   ├── OrderDetailsController.cs
 │   │   ├── PostController.cs
 │   │   ├── ProductController.cs
 │   │   └── UserController.cs
 │   │
 │   ├── Models
-│   │
 │   ├── Views
-│   │   ├── Category
-│   │   ├── CategoryProduct
-│   │   ├── Customer
-│   │   ├── Home
-│   │   ├── Order
-│   │   ├── OrderDetail
-│   │   ├── Post
-│   │   ├── Product
-│   │   ├── User
-│   │   └── Shared
-│   │
 │   ├── wwwroot
 │   ├── appsettings.json
 │   └── Program.cs
 │
 ├── CMS.Data
 │   ├── Entities
+│   │   ├── Cart.cs
+│   │   ├── CartItem.cs
 │   │   ├── Category.cs
 │   │   ├── CategoryProduct.cs
 │   │   ├── Customer.cs
@@ -141,13 +133,29 @@ CMS Solution
 │   └── ApplicationDbContext.cs
 │
 ├── cms.frontend (ReactJS)
-│   ├── node_modules
 │   ├── public
 │   ├── src
+│   │   ├── api
+│   │   │   └── axiosClient.js
+│   │   ├── components
+│   │   │   ├── Header.jsx
+│   │   │   └── Footer.jsx
+│   │   ├── context
+│   │   │   └── CartContext.js
+│   │   ├── pages
+│   │   │   ├── Cart
+│   │   │   ├── Checkout
+│   │   │   ├── MyOrders
+│   │   │   ├── ProductDetail
+│   │   │   └── ...
+│   │   └── services
+│   │       ├── cartService.js
+│   │       ├── orderService.js
+│   │       └── productService.js
 │   ├── package.json
 │   └── package-lock.json
 │
-└── Database (SQL Server - CMS_DB)
+└── README.md
 ```
 
 ---
@@ -157,248 +165,199 @@ CMS Solution
 ## 🟦 6.1 Quản trị (Admin - ASP.NET MVC)
 
 ### 🔐 Quản lý người dùng
-
 * Thêm / sửa / xóa người dùng
 * Quản lý tài khoản hệ thống
 
 ### 📂 Quản lý danh mục (Category)
-
 * Thêm / sửa / xóa danh mục
-* Phân loại nội dung và sản phẩm
 
 ### 📦 Quản lý sản phẩm (Product)
-
 * Thêm / sửa / xóa sản phẩm
-* Liên kết sản phẩm với danh mục
-
-### 🔗 Quản lý CategoryProduct
-
-* Quản lý quan hệ giữa danh mục và sản phẩm
+* Quản lý tồn kho (`StockQuantity`)
+* Upload ảnh sản phẩm
 
 ### 📝 Quản lý bài viết (Post)
-
 * Thêm / sửa / xóa bài viết
-* Hiển thị nội dung động
 
 ### 👥 Quản lý khách hàng (Customer)
-
 * Thêm / sửa / xóa khách hàng
 
 ### 🧾 Quản lý đơn hàng (Order)
-
-* Tạo / cập nhật / xóa đơn hàng
-
-### 📄 Quản lý chi tiết đơn hàng (OrderDetail)
-
-* Quản lý sản phẩm trong đơn hàng
-
-### ✅ Chức năng bổ sung
-
-* Validate dữ liệu form
-* Razor View + Bootstrap UI
-* Điều hướng MVC rõ ràng
+* Xem danh sách đơn hàng
+* Cập nhật trạng thái đơn hàng
 
 ---
 
-# 🟩 6.2 Web API (Backend Service)
+## 🟩 6.2 Web API (Backend Service)
 
-Hệ thống cung cấp API RESTful:
+### Sản phẩm & Danh mục
 
-| Method | Endpoint          | Mô tả                  |
-| ------ | ----------------- | ---------------------- |
-| GET    | `/api/posts`      | Lấy danh sách bài viết |
-| GET    | `/api/posts/{id}` | Chi tiết bài viết      |
-| GET    | `/api/categories` | Danh sách danh mục     |
-| GET    | `/api/products`   | Danh sách sản phẩm     |
-| GET    | `/api/orders`     | Danh sách đơn hàng     |
-| POST   | `/api/posts`      | Thêm bài viết          |
-| PUT    | `/api/posts/{id}` | Cập nhật bài viết      |
-| DELETE | `/api/posts/{id}` | Xóa bài viết           |
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/products` | Danh sách sản phẩm |
+| GET | `/api/products/{id}` | Chi tiết sản phẩm |
+| GET | `/api/categories` | Danh sách danh mục |
 
----
+### Giỏ hàng
 
-# 🟨 6.3 Frontend ReactJS (SPA)
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/carts/{customerId}` | Lấy giỏ hàng |
+| POST | `/api/carts/add` | Thêm sản phẩm vào giỏ |
+| PUT | `/api/carts/increase/{id}` | Tăng số lượng |
+| PUT | `/api/carts/decrease/{id}` | Giảm số lượng |
+| DELETE | `/api/carts/item/{id}` | Xóa 1 sản phẩm |
+| DELETE | `/api/carts/clear/{customerId}` | Xóa toàn bộ giỏ |
 
-* Hiển thị danh sách bài viết dạng card
-* Hiển thị danh sách sản phẩm
-* Trang chi tiết bài viết
-* Trang chi tiết sản phẩm
-* Điều hướng bằng React Router
-* Gọi API bằng Axios
-* Render dữ liệu động từ backend
+### Đơn hàng
 
----
-
-# 🧠 7. Công nghệ & kỹ thuật áp dụng
-
-* MVC Pattern
-* RESTful API Design
-* Dependency Injection (DI)
-* Entity Framework Core + Migration
-* LINQ to Entities
-* SPA (Single Page Application)
-* Authentication & Authorization
-* Separation of Concerns (SoC)
-* CRUD Operations
-* Razor View Engine
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/orders` | Tạo đơn hàng (tự trừ tồn kho) |
+| GET | `/api/orders/{id}` | Chi tiết đơn hàng |
+| GET | `/api/orders/customer/{customerId}` | Đơn hàng theo khách |
+| GET | `/api/orderdetails/order/{orderId}` | Chi tiết sản phẩm trong đơn |
 
 ---
 
-# 🗄️ 8. Database Design
+## 🟨 6.3 Frontend ReactJS (SPA)
 
-## 🔹 Bảng Category
-
-* Id (PK)
-* Name
-* Description
-
-## 🔹 Bảng Product
-
-* Id (PK)
-* Name
-* Price
-* Description
-* Image
-* CategoryId (FK)
-
-## 🔹 Bảng Post
-
-* Id (PK)
-* Title
-* Content
-* Image
-* CategoryId (FK)
-* CreatedDate
-
-## 🔹 Bảng Customer
-
-* Id (PK)
-* FullName
-* Phone
-* Address
-* Email
-
-## 🔹 Bảng Order
-
-* Id (PK)
-* CustomerId (FK)
-* OrderDate
-* TotalAmount
-
-## 🔹 Bảng OrderDetail
-
-* Id (PK)
-* OrderId (FK)
-* ProductId (FK)
-* Quantity
-* Price
-
-## 🔹 Bảng User
-
-* Id (PK)
-* Username
-* Password
-* Role
-
-## 🔹 Bảng CategoryProduct
-
-* CategoryId (FK)
-* ProductId (FK)
+* Trang chủ — danh sách sản phẩm
+* Trang chi tiết sản phẩm — xem thông tin, chọn số lượng, thêm vào giỏ
+* Trang giỏ hàng — tăng/giảm/xóa sản phẩm, xem tổng tiền, phí ship
+* Trang thanh toán — nhập thông tin giao hàng, xem lại đơn hàng, đặt hàng
+* Trang lịch sử đơn hàng — xem các đơn đã đặt, bấm mở chi tiết từng đơn
+* Badge giỏ hàng trên Header tự cập nhật sau mỗi thao tác (React Context)
 
 ---
 
-# 🔄 9. Quy trình hoạt động hệ thống
+# 🔄 7. Luồng mua hàng
 
-1. Admin đăng nhập hệ thống
-2. Quản lý dữ liệu:
-
-   * Category
-   * Product
-   * Post
-   * Customer
-   * Order
-3. Dữ liệu được lưu vào SQL Server
-4. Web API lấy dữ liệu từ Database
-5. ReactJS gọi API bằng Axios
-6. Dữ liệu hiển thị trên giao diện người dùng
+```text
+Khách hàng đăng nhập
+        ↓
+Xem sản phẩm → Thêm vào giỏ hàng
+        ↓
+Trang giỏ hàng → Kiểm tra, điều chỉnh số lượng
+        ↓
+Trang thanh toán → Nhập thông tin giao hàng
+        ↓
+Bấm "Xác nhận đặt hàng"
+        ↓
+Backend: Tạo Order + OrderDetail + Trừ StockQuantity (1 Transaction)
+        ↓
+Frontend: Xóa giỏ hàng → Chuyển về trang chủ
+        ↓
+Khách hàng xem lại đơn tại "Đơn hàng của tôi"
+```
 
 ---
 
-# 🚀 10. Hướng dẫn cài đặt & chạy dự án
+# 🚀 8. Hướng dẫn cài đặt & chạy dự án
 
-## 🔹 10.1 Clone project
+## Yêu cầu
+
+| Công cụ | Phiên bản |
+|---------|-----------|
+| .NET SDK | 7.0+ |
+| SQL Server | 2019+ hoặc LocalDB |
+| Node.js | 18+ |
+| npm | 9+ |
+
+## 🔹 Bước 1 — Clone project
 
 ```bash
 git clone <repository-url>
 ```
 
-## 🔹 10.2 Backend (.NET Core)
+## 🔹 Bước 2 — Chạy Backend
+
+1. Mở file `CMS.Backend/appsettings.json`, cập nhật chuỗi kết nối:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=TÊN_SERVER;Database=CMS_DB;Trusted_Connection=True;TrustServerCertificate=True"
+}
+```
+
+2. Chạy migration để tạo database:
 
 ```bash
 cd CMS.Backend
-dotnet restore
 dotnet ef database update
+```
+
+3. Nhấn **F5** trong Visual Studio, hoặc:
+
+```bash
 dotnet run
 ```
 
-## 🔹 10.3 Frontend (ReactJS)
+> Backend chạy tại: `https://localhost:7077`
+
+## 🔹 Bước 3 — Chạy Frontend
 
 ```bash
 cd cms.frontend
-npm install
+npm install      # chỉ cần chạy lần đầu
 npm start
 ```
 
----
+> Frontend chạy tại: `http://localhost:3000`
 
-# 🔐 11. Bảo mật hệ thống
-
-* ASP.NET Core Identity
-* Phân quyền Admin
-* Validate dữ liệu đầu vào
-* Chống truy cập trái phép API
-* Kiểm tra dữ liệu form phía server
+> ⚠️ **Lưu ý:** Khởi động Backend trước, Frontend sau.
 
 ---
 
-# 📊 12. Ưu điểm của hệ thống
+# 🗄️ 9. Database Design
 
-* Kiến trúc rõ ràng, dễ mở rộng
-* Tách biệt frontend & backend
-* Dễ bảo trì và nâng cấp
-* Áp dụng công nghệ thực tế doanh nghiệp
-* Hỗ trợ SPA giúp trải nghiệm mượt
-* Quản lý dữ liệu đa chức năng
-* Có thể mở rộng thành hệ thống thương mại điện tử
+## Bảng Cart
+* Id (PK), CustomerId (FK), CreatedAt
+
+## Bảng CartItem
+* Id (PK), CartId (FK), ProductId (FK), Quantity
+
+## Bảng Product
+* Id (PK), Name, Price, Description, ImageUrl, StockQuantity, CategoryId (FK)
+
+## Bảng Order
+* Id (PK), CustomerId (FK), OrderDate, Status, Notes
+
+## Bảng OrderDetail
+* Id (PK), OrderId (FK), ProductId (FK), Quantity, UnitPrice
+
+## Bảng Customer
+* Id (PK), FullName, Phone, Address, Email, Password
+
+## Bảng Category
+* Id (PK), Name, Description
+
+## Bảng Post
+* Id (PK), Title, Content, Image, CategoryId (FK), CreatedDate
+
+## Bảng User
+* Id (PK), Username, Password, Role
 
 ---
 
-# 📌 13. Hướng phát triển
+# 📌 10. Hướng phát triển
 
 * Thêm JWT Authentication cho API
-* Tích hợp upload ảnh Cloud (Cloudinary/Azure)
-* Thêm dashboard thống kê admin
-* Tích hợp thanh toán online
-* Thêm comment cho bài viết
-* Tối ưu SEO React (SSR/Next.js)
+* Tích hợp upload ảnh Cloud (Cloudinary / Azure Blob)
+* Dashboard thống kê doanh thu cho Admin
+* Tích hợp thanh toán online (VNPay / MoMo)
+* Tối ưu SEO với Next.js
 * Triển khai Docker & CI/CD
 
 ---
 
-# 👨‍💻 14. Kết luận
+# 👨‍💻 11. Kết luận
 
-Dự án CMS là một hệ thống full-stack hoàn chỉnh giúp sinh viên:
-
-* Hiểu kiến trúc phần mềm hiện đại
-* Nắm vững ASP.NET Core + EF Core
-* Thành thạo mô hình MVC + Web API
-* Kết hợp backend API với frontend ReactJS
-* Xây dựng tư duy phát triển hệ thống thực tế
-* Làm quen quy trình phát triển phần mềm doanh nghiệp
+Dự án CMS là một hệ thống full-stack hoàn chỉnh giúp sinh viên nắm vững kiến trúc phần mềm hiện đại, từ thiết kế database, xây dựng API đến tích hợp giao diện ReactJS và xử lý nghiệp vụ thực tế như quản lý giỏ hàng, đặt hàng và kiểm soát tồn kho.
 
 ---
 
-# ⭐ 15. Tác giả
+# ⭐ 12. Tác giả
 
 * **Sinh viên:** Trần Thị Kim Quí
 * **Môn học:** ASP.NET Core Advanced
